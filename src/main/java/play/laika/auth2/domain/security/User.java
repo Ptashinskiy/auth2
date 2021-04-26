@@ -1,5 +1,7 @@
 package play.laika.auth2.domain.security;
 
+import play.laika.auth2.web.io.UserDto;
+
 import javax.persistence.*;
 import java.util.UUID;
 
@@ -13,18 +15,23 @@ public class User {
     @Column(nullable = false, unique = true)
     private String deviceId;
 
-    private String password;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 
     public User() {
     }
 
-    public User(String deviceId, String password) {
+    public User(String deviceId) {
         this.id = UUID.randomUUID().toString();
         this.deviceId = deviceId;
-        this.password = password;
         this.role = Role.ROLE_USER;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public UserDto toDto() {
+        return new UserDto(deviceId);
     }
 }
