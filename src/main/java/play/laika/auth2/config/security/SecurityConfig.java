@@ -1,4 +1,4 @@
-package play.laika.auth2.config;
+package play.laika.auth2.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -28,10 +28,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/admin").hasRole("ADMIN")
-                .antMatchers("/user").hasRole("USER")
-                .antMatchers("/auth").permitAll()
-                .antMatchers("/auth/*").permitAll()
+                .antMatchers("/auth/**").permitAll()
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/user/**").hasRole("USER")
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

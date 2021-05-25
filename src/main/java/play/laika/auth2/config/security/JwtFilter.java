@@ -1,4 +1,4 @@
-package play.laika.auth2.config;
+package play.laika.auth2.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,23 +14,25 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
+import static play.laika.auth2.config.security.JWTSettings.*;
+
 @Component
 public class JwtFilter extends GenericFilterBean {
 
-    private final JwtProvider jwtProvider;
+    private final JwtFactory jwtFactory;
     private final CustomUserDetailsService userDetailsService;
 
     @Autowired
-    public JwtFilter(JwtProvider jwtProvider, CustomUserDetailsService userDetailsService) {
-        this.jwtProvider = jwtProvider;
+    public JwtFilter(JwtFactory jwtFactory, CustomUserDetailsService userDetailsService) {
+        this.jwtFactory = jwtFactory;
         this.userDetailsService = userDetailsService;
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         String token = getTokenFromRequest((HttpServletRequest) servletRequest);
-        if (token != null && jwtProvider.tokenIsValid(token)) {
-            String userLogin = jwtProvider.getLoginFromToken(token);
+        if (token != null && jwtFactory.tokenIsValid(token)) {
+            String userLogin = jwtFactory.getLoginFromToken(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(userLogin);
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
@@ -39,9 +41,9 @@ public class JwtFilter extends GenericFilterBean {
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.replace("Bearer ", "");
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (bearerToken != null && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.replace(BEARER_PREFIX, "");
         }
         return null;
     }

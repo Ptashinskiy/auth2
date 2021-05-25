@@ -6,9 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import play.laika.auth2.config.JwtProvider;
-import play.laika.auth2.domain.security.User;
-import play.laika.auth2.service.security.UserService;
+import play.laika.auth2.config.security.JwtFactory;
+import play.laika.auth2.service.UserService;
 import play.laika.auth2.web.io.AccessToken;
 import play.laika.auth2.web.io.LoginRequest;
 import play.laika.auth2.web.io.RegisterNewUserRequest;
@@ -19,12 +18,12 @@ import play.laika.auth2.web.io.UserDto;
 public class AuthController {
 
     private final UserService userService;
-    private final JwtProvider jwtProvider;
+    private final JwtFactory jwtFactory;
 
     @Autowired
-    public AuthController(UserService userService, JwtProvider jwtProvider) {
+    public AuthController(UserService userService, JwtFactory jwtFactory) {
         this.userService = userService;
-        this.jwtProvider = jwtProvider;
+        this.jwtFactory = jwtFactory;
     }
 
     @PostMapping
@@ -33,10 +32,18 @@ public class AuthController {
         return ResponseEntity.ok(newUser);
     }
 
+    @PostMapping("/admins")
+    public ResponseEntity<UserDto> registerNewAdmin(@RequestBody RegisterNewUserRequest request) {
+        return ResponseEntity.ok(userService.createNewAdmin(request.getDeviceId()));
+    }
+
+    /** If an application requires password authentication - it must be implemented here:
+     * request.getPassword().equals(user.getPassword())
+     * */
     @PostMapping("/login")
     public ResponseEntity<AccessToken> login(@RequestBody LoginRequest request) {
-        User user = userService.findByDeviceId(request.getDeviceId());
-        String accessToken = jwtProvider.generateToken(user.getDeviceId());
+        UserDto user = userService.findByDeviceId(request.getDeviceId());
+        String accessToken = jwtFactory.generateToken(user.getDeviceId());
         return ResponseEntity.ok(new AccessToken(accessToken));
     }
 }

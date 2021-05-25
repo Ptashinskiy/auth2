@@ -1,12 +1,11 @@
-package play.laika.auth2.config;
+package play.laika.auth2.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-import play.laika.auth2.domain.security.User;
-import play.laika.auth2.service.security.UserService;
+import play.laika.auth2.service.UserService;
 
 @Component
 public class CustomUserDetailsService implements UserDetailsService {
@@ -20,7 +19,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        User user = userService.findByDeviceId(s);
-        return CustomUserDetails.fromUserEntity(user);
+        return CustomUserDetails.fromUserDto(userService.findByDeviceId(s));
     }
 }

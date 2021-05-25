@@ -1,9 +1,9 @@
-package play.laika.auth2.config;
+package play.laika.auth2.config.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import play.laika.auth2.domain.security.User;
+import play.laika.auth2.web.io.UserDto;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -18,10 +18,10 @@ public class CustomUserDetails implements UserDetails {
         this.grantedAuthorities = grantedAuthorities;
     }
 
-    public static CustomUserDetails fromUserEntity(User user) {
+    public static CustomUserDetails fromUserDto(UserDto user) {
         return new CustomUserDetails(
                 user.getDeviceId(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+                Collections.singletonList(new SimpleGrantedAuthority(user.getRole())));
     }
 
     @Override
